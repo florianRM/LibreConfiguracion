@@ -1,0 +1,4 @@
+NODE_ENV=development
+HOST=127.0.0.1
+PORT=5000
+MONGODB_CNN=mongodb+srv://mongo:2LCt2787odoW863L@cluster0.imzz1id.mongodb.net/beers
