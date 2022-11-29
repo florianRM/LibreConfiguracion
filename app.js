@@ -16,7 +16,7 @@ app.use(express.json());
 app.use('/beers', require('./routes/beers'));
 app.use('/pubs', require('./routes/pubs'));
 app.use('/users', require('./routes/users'));
-app.use('/auth/login', require('./routes/login'));
+app.use('/auth', require('./routes/auth'));
 
 app.listen(config.PORT, config.HOST, function () {
   console.log(`App listening on http://${config.HOST}:${config.PORT}`);
