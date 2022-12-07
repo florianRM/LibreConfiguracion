@@ -1,6 +1,7 @@
 const bcryptjs = require("bcryptjs");
 const { request, response } = require("express");
 const user = require("../models/user");
+const { genJWT } = require("../helpers/genJWT");
 
 const loginCheck = async (req = request, res = response) => {
     const { email, password } = req.body;
@@ -10,7 +11,7 @@ const loginCheck = async (req = request, res = response) => {
         if(!userDB) {
             return res.status(401).json({msg: 'User/password incorrect - email'});
         }
-        if(!userActive) {
+        if(!userDB.status) {
             return res.json({msg: 'User/password incorrect - inactive'});
         }
 
@@ -20,9 +21,13 @@ const loginCheck = async (req = request, res = response) => {
             return res.json({msg: 'User/password incorrect - password'});
         }
 
-        res.json(userDB);
+        const token = await genJWT(userDB._id);
+        res.json({
+            userDB,
+            token
+        })
     } catch (error) {
-        console.log('Error en el servidor.');
+        console.log(error);
         res.status(500).json({
             msg: 'Error en el servidor.'
         })
