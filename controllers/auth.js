@@ -1,12 +1,12 @@
 const bcryptjs = require("bcryptjs");
 const { request, response } = require("express");
-const user = require("../models/user");
+const User = require("../models/user");
 const { genJWT } = require("../helpers/genJWT");
 
 const loginCheck = async (req = request, res = response) => {
     const { email, password } = req.body;
     try {
-        const userDB = await user.findOne({email});
+        const userDB = await User.findOne({email});
 
         if(!userDB) {
             return res.status(401).json({msg: 'User/password incorrect - email'});
@@ -20,8 +20,7 @@ const loginCheck = async (req = request, res = response) => {
         if(!passwordExist) {
             return res.json({msg: 'User/password incorrect - password'});
         }
-
-        const token = await genJWT(userDB._id);
+        const token = await genJWT(userDB.id);
         res.json({
             userDB,
             token
