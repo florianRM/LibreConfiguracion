@@ -26,7 +26,10 @@ const CervezaSchema = Schema({
             type: Schema.Types.ObjectId,
             ref: 'Pub'
         }
-    ]
+    ],
+    img: {
+        type: String
+    }
 });
 
 module.exports = model('Cerveza', CervezaSchema);

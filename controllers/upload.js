@@ -1,35 +1,106 @@
-const { request, response } = require('express')
-const path = require('node:path');
-const { v4 } = require('uuid');
+const fs = require('fs');
+const path = require('path');
 
-const uploadFile = (req = request, res = response) => {
-    let sampleFile;
-    let uploadPath;
-    const extensiones = ['.jpeg', '.jpg', '.pdf'];
 
+const { request, response } = require('express');
+const { uploadFile } = require('../helpers/uploadImage');
+const user = require('../models/user');
+const beer = require('../models/beer');
+
+const upload = async(req, res = response) => {
+    const { collection } = req.params;
+    let name = 'imgs';
+
+    switch(collection) {
+        case 'user':
+            name = 'user';
+            break;
+        case 'beer':
+            name = 'beers';
+            break;
+    }
+    
     if (!req.files || Object.keys(req.files).length === 0) {
-        return res.status(400).json({msg: 'No files were uploaded.'});
+        res.status(400).send('No files were uploaded.');
+        return;
     }
 
-    // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
-    sampleFile = req.files.file;
-    const extensionFichero = path.extname(sampleFile.name)
-
-    if(!extensiones.includes(extensionFichero)) {
-        return res.status(401).json({msg: `Solo se puede subir ficheros ${extensiones}`})
+    try {
+        
+        // txt, md
+        // const nombre = await uploadFile( req.files, ['txt','md'], 'textos' );
+        const nombre = await uploadFile( req.files, undefined, name );
+        res.json({ nombre });
+        
+    } catch (msg) {
+        res.status(400).json({ msg });
     }
 
-    const nombre = v4() + extensionFichero;
-    uploadPath = path.join(__dirname, '../uploads', nombre);
-    // Use the mv() method to place the file somewhere on your server
-    sampleFile.mv(uploadPath, function(err) {
-        if (err)
-            return res.status(500).json({msg: err});
+}
 
-        res.json({msg: `Se ha enviado correctamente a ${uploadPath}`, fileExtension: extensionFichero});
-    });
+const updateImage = async (req = request, res = response) => {
+    const { id, collection } = req.params;
+    let obj, collectionName;
+
+    switch(collection) {
+        case 'user':
+            obj = await user.findById(id);
+            collectionName = 'user';
+            break;
+        case 'beer':
+            obj = await beer.findById(id);
+            collectionName = 'beers';
+            break;
+    }
+
+    if(obj) {
+        const dirLocation = path.join(__dirname, '../uploads', collectionName, obj.img);
+
+        if(!fs.existsSync(dirLocation)) {
+            return res.status(400).json({msg: "El fichero no existe."});
+        }
+        fs.unlinkSync(dirLocation);
+
+        if (!req.files || Object.keys(req.files).length === 0) {
+            res.status(400).send('No files were uploaded.');
+            return;
+        }
+    
+        try {
+            
+            // txt, md
+            // const nombre = await uploadFile( req.files, ['txt','md'], 'textos' );
+            const nombre = await uploadFile( req.files, undefined, collectionName );
+            obj.img = nombre;
+            obj.save();
+    
+        } catch (msg) {
+            res.status(400).json({ msg });
+        }
+    }
+    res.json({});
+} 
+
+const getImage = async (req = request, res = response) => {
+    
+    switch(collection) {
+        case 'user':
+            obj = await user.findById(id);
+            collectionName = 'user';
+            break;
+        case 'beer':
+            obj = await beer.findById(id);
+            collectionName = 'beers';
+            break;
+    }
+
+    const dirLocation = path.join(__dirname, '../uploads', collectionName, obj.img);
+    
+    if(!fs.existsSync(dirLocation)) {
+        return res.status(400).json({msg: "El fichero no existe."});
+    }
 }
 
 module.exports = {
-    uploadFile
+    upload, updateImage
 }

@@ -12,10 +12,10 @@ const getUsers = async(req = request, res = response) => {
 }
 
 const addUser = async(req, res) => {
-    const { name, email, password, rol} = req.body;
+    const { name, email, password, rol, img} = req.body;
     
     // Encriptar la contraseña
-    const user = new User({name, email, password, rol})
+    const user = new User({name, email, password, rol, img})
     const salt = bcryptjs.genSaltSync();
     user.password = bcryptjs.hashSync( password, salt );
 
