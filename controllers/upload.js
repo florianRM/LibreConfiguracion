@@ -49,7 +49,7 @@ const updateImage = async (req = request, res = response) => {
             break;
         case 'beer':
             obj = await beer.findById(id);
-            collectionName = 'beers';
+            collectionName = 'beer';
             break;
     }
 
@@ -82,7 +82,9 @@ const updateImage = async (req = request, res = response) => {
 } 
 
 const getImage = async (req = request, res = response) => {
-    
+    const { id, collection } = req.params;
+    let obj, collectionName;
+
     switch(collection) {
         case 'user':
             obj = await user.findById(id);
@@ -99,8 +101,10 @@ const getImage = async (req = request, res = response) => {
     if(!fs.existsSync(dirLocation)) {
         return res.status(400).json({msg: "El fichero no existe."});
     }
+
+    res.sendFile(dirLocation);
 }
 
 module.exports = {
-    upload, updateImage
+    upload, updateImage, getImage
 }
